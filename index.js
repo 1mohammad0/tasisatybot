@@ -6,7 +6,7 @@ import express from "express";
 
 dotenv.config();
 
-/* ================= EXPRESS (Render) ================= */
+/* ================= EXPRESS (Render needs PORT) ================= */
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -44,7 +44,7 @@ fs.watch("./data", (event, filename) => {
 /* ================= AI FUNCTION ================= */
 async function askAI(question) {
   const res = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-3.5-turbo",  // مدل سبک‌تر و کم‌مصرف‌تر
     messages: [
       {
         role: "system",
@@ -71,6 +71,29 @@ ${productsText}
   return res.choices[0].message.content.trim();
 }
 
+/* ================= کاهش مصرف API / پاسخ بدون AI ================= */
+function findAnswerInText(question) {
+  const lowerQ = question.toLowerCase();
+
+  // بررسی محصولات
+  const productsLines = productsText.split("\n");
+  for (let line of productsLines) {
+    if (line.toLowerCase().includes(lowerQ)) {
+      return line; // پاسخ مستقیم بدون AI
+    }
+  }
+
+  // بررسی info
+  const infoLines = infoText.split("\n");
+  for (let line of infoLines) {
+    if (line.toLowerCase().includes(lowerQ)) {
+      return line; // پاسخ مستقیم بدون AI
+    }
+  }
+
+  return null; // اگه نبود → میریم سراغ AI
+}
+
 /* ================= MESSAGE HANDLER ================= */
 bot.on("message", async (msg) => {
   if (!msg.text) return;
@@ -79,9 +102,17 @@ bot.on("message", async (msg) => {
   const question = msg.text;
 
   try {
-    const answer = await askAI(question);
+    // اول بررسی کنیم داخل فایل txt جواب هست؟
+    let answer = findAnswerInText(question);
+
+    if (!answer) {
+      // اگر نبود → فقط سوال مرتبط → AI
+      answer = await askAI(question);
+    }
+
     await bot.sendMessage(chatId, answer);
 
+    // اگر AI گفت سوال مورد نظر شما ذکر نشده است → گزارش به Admin
     if (answer === "سؤال مورد نظر شما ذکر نشده است") {
       await bot.sendMessage(
         process.env.ADMIN_ID,
@@ -89,7 +120,7 @@ bot.on("message", async (msg) => {
       );
     }
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERROR:", err.message);
     bot.sendMessage(chatId, "خطا در ارتباط با سرور");
   }
 });
