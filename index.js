@@ -22,7 +22,8 @@ function mainMenu(chatId) {
         ["📞 ارتباط با ما", "📢 کانال اصلی"],
         ["📍 آدرس فروشگاه"]
       ],
-      resize_keyboard: true
+      resize_keyboard: true,
+      one_time_keyboard: false
     }
   });
 }
@@ -53,6 +54,7 @@ bot.on("message", async msg => {
 
   if (!text || text.startsWith("/")) return;
 
+  // ---------- Main Menu Options ----------
   if (text === "🔍 جستجوی محصول") {
     return bot.sendMessage(chatId, "✍️ نام محصول مورد نظر را وارد کنید:");
   }
@@ -78,7 +80,7 @@ https://t.me/tasisatyeshagi`
 
   // ---------- Send Shop Location ----------
   if (text === "📍 آدرس فروشگاه") {
-    return bot.sendLocation(chatId, 38.260, 48.314);
+    return bot.sendLocation(chatId, 38.2598767, 48.3091167);
   }
 
   // ---------- Product Search ----------
