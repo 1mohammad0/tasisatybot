@@ -19,7 +19,8 @@ function mainMenu(chatId) {
     reply_markup: {
       keyboard: [
         ["🔍 جستجوی محصول"],
-        ["📞 ارتباط با ما", "📢 کانال اصلی"]
+        ["📞 ارتباط با ما", "📢 کانال اصلی"],
+        ["📍 آدرس فروشگاه"]
       ],
       resize_keyboard: true
     }
@@ -73,6 +74,11 @@ bot.on("message", async msg => {
 `📢 کانال اصلی تأسیساتی اسحقی
 https://t.me/tasisatyeshagi`
     );
+  }
+
+  // ---------- Send Shop Location ----------
+  if (text === "📍 آدرس فروشگاه") {
+    return bot.sendLocation(chatId, 38.260, 48.314);
   }
 
   // ---------- Product Search ----------
